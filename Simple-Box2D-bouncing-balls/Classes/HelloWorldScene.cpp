@@ -114,7 +114,7 @@ bool HelloWorld::init()
     
     // Adding the sprites (balls) which will be added to the Box2D shapes via userData 
     Sprite *ball = Sprite::create("bomba.png");
-    ball->setPosition(100, 200);
+    ball->setPosition(100, 200); // Setting this position is optional, if not set it will take box2D position
     this->addChild(ball);
 
     Sprite *ball1 = Sprite::create("bomba.png");
