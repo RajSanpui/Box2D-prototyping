@@ -124,7 +124,8 @@ bool HelloWorld::init()
     // Creating box2D circle shape
     b2CircleShape circleShape;
     circleShape.m_p.Set(0, 0); //position, relative to body position
-    //circleShape.m_radius = 1; //radius
+    circleShape.m_radius = 26.0/PTM_RATIO;; // This will make the balls bounce one on top of another
+    //circleShape.m_radius = 1; // Commenting out will make the box slide one on top of another
 
     // Attribute for first ball
     b2BodyDef myBodyDef1;
