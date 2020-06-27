@@ -79,7 +79,7 @@ bool HelloWorld::init()
     m_world = new b2World(gravity);
     m_world->SetContinuousPhysics(true);
 
-
+    // Setting the ground body below where the balls can bounce
     CCSize winSize = CCDirector::sharedDirector()->getWinSize();
     b2BodyDef groundBodyDef;
     groundBodyDef.position.Set(0, 0);
@@ -111,7 +111,8 @@ bool HelloWorld::init()
     screenBorderBody->CreateFixture(&screenBorderShape, 0);
     screenBorderShape.Set(upperLeftCorner, lowerLeftCorner);
     screenBorderBody->CreateFixture(&screenBorderShape, 0);
-
+    
+    // Adding the sprites (balls) which will be added to the Box2D shapes via userData 
     Sprite *ball = Sprite::create("bomba.png");
     ball->setPosition(100, 200);
     this->addChild(ball);
@@ -119,11 +120,13 @@ bool HelloWorld::init()
     Sprite *ball1 = Sprite::create("bomba.png");
     ball1->setPosition(100, 150);
     this->addChild(ball1);
-
+    
+    // Creating box2D circle shape
     b2CircleShape circleShape;
     circleShape.m_p.Set(0, 0); //position, relative to body position
     //circleShape.m_radius = 1; //radius
 
+    // Attribute for first ball
     b2BodyDef myBodyDef1;
     myBodyDef1.type = b2_dynamicBody; //this will be a dynamic body
     myBodyDef1.position.Set(100/PTM_RATIO, 200/PTM_RATIO); //a little to the left
@@ -140,13 +143,12 @@ bool HelloWorld::init()
     dynamicBody1->CreateFixture(&myFixtureDef); //add a fixture to the body
 
 
-    // Ball2 initialization
+    // Attribute for second ball
     b2BodyDef myBodyDef2;
     myBodyDef2.type = b2_dynamicBody; //this will be a dynamic body
     myBodyDef2.position.Set(100/PTM_RATIO, 150/PTM_RATIO); //a little to the left
     myBodyDef2.userData = ball1;
 
-    //debugLayer->setPosition(30,20);
     b2Body* dynamicBody2 = m_world->CreateBody(&myBodyDef2);
 
     b2FixtureDef myFixtureDef1;
