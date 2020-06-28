@@ -1,5 +1,6 @@
 Declaration is same -
 
+
    void HelloWorld::initTouch()
    {
      auto listener = EventListenerTouchOneByOne::create();
