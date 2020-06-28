@@ -6,8 +6,9 @@ Declaration is same -
     listener -> onTouchBegan = [] (Touch* touch, Event* event) { return true;};
     listener -> onTouchMoved = CC_CALLBACK_2(HelloWorld::ccTouchesMoved, this);
     listener -> onTouchEnded = [=] (Touch* touch, Event* event) {};
-    _eventDispatcher -> addEventListenerWithSceneGraphPriority(listener, this);
-  }
+    
+     _eventDispatcher -> addEventListenerWithSceneGraphPriority(listener, this);
+   }
   
   However, the difference is how the Sprite is moved - 
   
