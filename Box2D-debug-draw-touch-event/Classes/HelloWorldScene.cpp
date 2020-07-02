@@ -197,7 +197,8 @@ void HelloWorld::ccTouchesMoved(Touch* touch, Event* evento)
     auto currPosition = touch->getLocation();
     auto director = Director::getInstance();
 
-    if(boulder->getBoundingBox().containsPoint(currPosition)) {
+    //if(boulder->getBoundingBox().containsPoint(currPosition)) This line should be commented so that you can tap outside sprite area
+    {
         if (touch) {
             //this->touch(locationInGLFromTouch(touch));
             CCLOG("************** Grounding event called ***************");
