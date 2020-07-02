@@ -8,6 +8,7 @@
 #include "../cocos2d/external/Box2D/include/Box2D/Dynamics/b2Body.h"
 #include "../cocos2d/external/Box2D/include/Box2D/Dynamics/b2Fixture.h"
 #include "../cocos2d/external/bullet/include/bullet/BulletDynamics/Character/btKinematicCharacterController.h"
+#include "../cocos2d/cocos/math/Vec2.h"
 
 #define PTM_RATIO 32.0
 #define FLOOR_HEIGHT 62.0f
@@ -143,13 +144,13 @@ bool HelloWorld::init()
 
     //debugLayer->setPosition(30,20);
     dynamicBody = m_world->CreateBody(&boulderdef);
-    dynamicBody->SetGravityScale(1);
+    //dynamicBody->SetGravityScale(1);
 
 
     boulderfixture.shape = &circleShape; //this is a pointer to the shape above
     boulderfixture.density = 1.0f;
     boulderfixture.friction = 0.0f;
-    boulderfixture.restitution = 0.3f;
+    boulderfixture.restitution = 0.0f;
     dynamicBody->CreateFixture(&boulderfixture); //add a fixture to the body
     //myFixtureDef1.filter.categoryBits = (uint16)PhysicsCategory::Bomba;
     //myFixtureDef1.filter.maskBits = (uint16)PhysicsCategory::Bomba;
@@ -166,7 +167,7 @@ void HelloWorld::initTouch()
     listener -> onTouchBegan = [] (Touch* touch, Event* event) { return true;};
     listener -> onTouchMoved = CC_CALLBACK_2(HelloWorld::ccTouchesMoved, this);
     //listener -> onTouchMoved = [=] (Touch* touch, Event* event) {};
-    //listener -> onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchesEnded, this);
+    listener -> onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchesEnded, this);
     //listener -> onTouchEnded = CC_CALLBACK_2(HelloWorld::ccTouchesMoved, this);
     _eventDispatcher -> addEventListenerWithSceneGraphPriority(listener, this);
 }
@@ -184,6 +185,11 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 
 }
 
+
+void HelloWorld::onTouchesEnded(Touch* touch, Event* evento)
+{
+    dynamicBody->SetLinearVelocity(b2Vec2(0,0));
+}
 
 void HelloWorld::ccTouchesMoved(Touch* touch, Event* evento)
 {
@@ -207,30 +213,38 @@ void HelloWorld::touch(Point location)
     b2Vec2 currentVelocity = dynamicBody->GetLinearVelocity();
     b2Vec2 impulse(0.0f,0.0f);
 
-    // walk
-    if (location.y < (winSize.height * 0.5f))
+    //auto touchLocation = this->convertToNodeSpace(location);
+    b2Vec2 touchLocation(location.x, location.y);
+    b2Vec2 playerPos = dynamicBody->GetPosition();
+
+    if (location.x < (winSize.width * 0.5f))
     {
-        // apply impulse if x velocity is getting low
-        if (fabsf(currentVelocity.x) < 5.0f)
-        {
-            impulse.y = 0.0f;
-            impulse.x = -5.0f;
-            dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
-            //if (location.x < (winSize.width * 0.5f))
-                //impulse.x = -impulse.x;
-                 //dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
-        }
+        impulse.x = -2.0f;
+        dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
     }
-        // jump
-    else
+    else if  (location.x > (winSize.width * 0.5f))
     {
-        // apply impulse
-        impulse.y = 20.0f;
-        impulse.x = 20.0f;
-        //if (location.x < (winSize.width * 0.5f))
-            //impulse.x = -impulse.x;
-            dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
+        impulse.x = 2.0f;
+        dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
+
     }
+
+/*
+    uint diffX = location.x - playerPos.x;
+    if (diffX < 0) // touch towards left of sprite, so move left
+    {
+        impulse.x = -1.0f;
+        dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
+        CCLOG("**************** diffX less than 0 = %u***********************", diffX);
+    }
+    else if (diffX > 0)
+    {
+        impulse.x = 1.0f;
+        dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
+        CCLOG("**************** diffX GREATER than 0 = %u ***********************", diffX);
+        CCLOG("Player position = %u, touch location = %u",playerPos.x, touchLocation.x);
+    }
+*/
 }
 
 void HelloWorld::tick(float dt)

@@ -43,6 +43,7 @@ public:
     // implement the "static create()" method manually
     void initTouch();
     void ccTouchesMoved(cocos2d::Touch* touch, cocos2d::Event* evento);
+    void onTouchesEnded(cocos2d::Touch* touch, cocos2d::Event* evento);
 
     DebugLayer *m_debugLayer;
 
