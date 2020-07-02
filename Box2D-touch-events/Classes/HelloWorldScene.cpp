@@ -8,6 +8,7 @@
 #include "../cocos2d/external/Box2D/include/Box2D/Dynamics/b2Body.h"
 #include "../cocos2d/external/Box2D/include/Box2D/Dynamics/b2Fixture.h"
 #include "../cocos2d/external/bullet/include/bullet/BulletDynamics/Character/btKinematicCharacterController.h"
+#include "../cocos2d/cocos/math/Vec2.h"
 
 #define PTM_RATIO 32.0
 #define FLOOR_HEIGHT 62.0f
@@ -77,12 +78,19 @@ bool HelloWorld::init()
     // add a label shows "Hello World"
     // create and initialize a label
 
+    //m_debugDrawLayer = new B2DebugDrawLayer();
+
+    //auto background = DrawNode::create();
+    //background->drawSolidRect(origin, visibleSize, Color4F(0.6,0.6,0.6,1.0));
+    //this->addChild(background, -1);
 
     b2Vec2 gravity;
     gravity.Set(0.0f, -10.0f);
     m_world = new b2World(gravity);
     m_world->SetContinuousPhysics(true);
 
+    m_debugLayer = new DebugLayer(m_world);
+    this->addChild(m_debugLayer, 9999);
 
     CCSize winSize = CCDirector::sharedDirector()->getWinSize();
     b2BodyDef groundBodyDef;
@@ -116,13 +124,6 @@ bool HelloWorld::init()
     screenBorderShape.Set(upperLeftCorner, lowerLeftCorner);
     screenBorderBody->CreateFixture(&screenBorderShape, 0);
 
-    ball = Sprite::create("bomba.png");
-    //ball->setPosition(100, 200);
-    this->addChild(ball);
-
-    ball1 = Sprite::create("bomba.png");
-    //ball1->setPosition(100, 150);
-    this->addChild(ball1);
 
     initTouch();
 
@@ -130,70 +131,30 @@ bool HelloWorld::init()
     circleShape.m_p.Set(0, 0); //position, relative to body position
     circleShape.m_radius = 26.0/PTM_RATIO;
     //circleShape.m_radius = 1; //radius
-
-    b2BodyDef myBodyDef1;
-    myBodyDef1.type = b2_dynamicBody; //this will be a dynamic body
-    myBodyDef1.position.Set(100/PTM_RATIO, 200/PTM_RATIO); //a little to the left
-    myBodyDef1.userData = ball;
-
-    //debugLayer->setPosition(30,20);
-    dynamicBody1 = m_world->CreateBody(&myBodyDef1);
-
-    b2FixtureDef myFixtureDef;
-    myFixtureDef.shape = &circleShape; //this is a pointer to the shape above
-    myFixtureDef.density = 1.0f;
-    myFixtureDef.friction = 0.2f;
-    myFixtureDef.restitution = 1.0f;
-    myFixtureDef.filter.categoryBits = (uint16)PhysicsCategory::Bomba;
-    myFixtureDef.filter.maskBits = (uint16)PhysicsCategory::Bomba;
-    dynamicBody1->CreateFixture(&myFixtureDef); //add a fixture to the body
+    boulder = Sprite::create("boulder.png");
+    boulder->setPosition(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2);
+    this->addChild(boulder);
 
 
     // Ball2 initialization
-    b2BodyDef myBodyDef2;
-    myBodyDef2.type = b2_dynamicBody; //this will be a dynamic body
-    myBodyDef2.position.Set(100/PTM_RATIO, 150/PTM_RATIO); //a little to the left
-    myBodyDef2.userData = ball1;
+    b2BodyDef boulderdef;
+    boulderdef.type = b2_dynamicBody; //this will be a dynamic body
+    boulderdef.position.Set((origin.x + visibleSize.width/2)/PTM_RATIO, (origin.y + visibleSize.height/2)/PTM_RATIO); //a little to the left
+    boulderdef.userData = boulder;
 
     //debugLayer->setPosition(30,20);
-    dynamicBody2 = m_world->CreateBody(&myBodyDef2);
+    dynamicBody = m_world->CreateBody(&boulderdef);
+    //dynamicBody->SetGravityScale(1);
 
-    b2FixtureDef myFixtureDef1;
-    myFixtureDef1.shape = &circleShape; //this is a pointer to the shape above
-    myFixtureDef1.density = 1.0f;
-    myFixtureDef1.friction = 0.2f;
-    myFixtureDef1.restitution = 1.0f;
-    dynamicBody2->CreateFixture(&myFixtureDef1); //add a fixture to the body
-    myFixtureDef1.filter.categoryBits = (uint16)PhysicsCategory::Bomba;
-    myFixtureDef1.filter.maskBits = (uint16)PhysicsCategory::Bomba;
 
-    // Initialize contact listener for collision detection
-    contactListener = new MyContactListener();
-    m_world->SetContactListener(contactListener);
+    boulderfixture.shape = &circleShape; //this is a pointer to the shape above
+    boulderfixture.density = 1.0f;
+    boulderfixture.friction = 0.0f;
+    boulderfixture.restitution = 0.0f;
+    dynamicBody->CreateFixture(&boulderfixture); //add a fixture to the body
+    //myFixtureDef1.filter.categoryBits = (uint16)PhysicsCategory::Bomba;
+    //myFixtureDef1.filter.maskBits = (uint16)PhysicsCategory::Bomba;
 
-    // Applying linear velocity
-    b2Vec2 vel(10, 0); // Only towards x-direction
-    dynamicBody2->SetLinearVelocity( vel );
-
-    // Applying force
-    dynamicBody1->ApplyForce( b2Vec2(10,0), dynamicBody1->GetWorldCenter(), true );
-
-    // Applying impulse
-    float velChange = -3.0f;
-    float impulse = dynamicBody1->GetMass() * velChange; //disregard time factor
-    dynamicBody1->ApplyLinearImpulse( b2Vec2(impulse,0), dynamicBody1->GetWorldCenter(), true );
-
-    //Box2D v2.2.1 onwards - Now body1 has no effect on gravity
-    dynamicBody1->SetGravityScale(0);//cancel gravity (use -1 to reverse gravity, etc)
-
-    // Rotating at a given angle
-    b2Vec2 toTarget(-140, 180);
-    float desiredAngle = atan2f( -toTarget.x, toTarget.y );
-    dynamicBody1->SetTransform( dynamicBody1->GetPosition(), desiredAngle );
-
-    // Applying torque
-    float32 totalRotation = 10.0f;
-    dynamicBody1->ApplyTorque( totalRotation, true );
 
     schedule( schedule_selector(HelloWorld::tick) );
 
@@ -205,7 +166,9 @@ void HelloWorld::initTouch()
     auto listener = EventListenerTouchOneByOne::create();
     listener -> onTouchBegan = [] (Touch* touch, Event* event) { return true;};
     listener -> onTouchMoved = CC_CALLBACK_2(HelloWorld::ccTouchesMoved, this);
-    listener -> onTouchEnded = [=] (Touch* touch, Event* event) {};
+    //listener -> onTouchMoved = [=] (Touch* touch, Event* event) {};
+    listener -> onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchesEnded, this);
+    //listener -> onTouchEnded = CC_CALLBACK_2(HelloWorld::ccTouchesMoved, this);
     _eventDispatcher -> addEventListenerWithSceneGraphPriority(listener, this);
 }
 
@@ -222,16 +185,66 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 
 }
 
+
+void HelloWorld::onTouchesEnded(Touch* touch, Event* evento)
+{
+    dynamicBody->SetLinearVelocity(b2Vec2(0,0));
+}
+
 void HelloWorld::ccTouchesMoved(Touch* touch, Event* evento)
 {
-    CCLOG("************** Touch event called ***************");
+    //CCLOG("************** Touch event called ***************");
     auto currPosition = touch->getLocation();
-    if(ball1->getBoundingBox().containsPoint(currPosition)){
-        CCLOG("************** Grounding event called ***************");
-        b2Vec2 vel(currPosition.x, currPosition.y);
-        //b2Vec2 vel(currPosition.x, 0);
-        dynamicBody2->SetLinearVelocity( vel );
+    auto director = Director::getInstance();
+
+    if(boulder->getBoundingBox().containsPoint(currPosition)) {
+        if (touch) {
+            //this->touch(locationInGLFromTouch(touch));
+            CCLOG("************** Grounding event called ***************");
+            //this->touch(director->convertToGL(touch->getLocationInView()));
+            this->touch(currPosition);
+        }
     }
+}
+
+void HelloWorld::touch(Point location)
+{
+    auto winSize = Director::getInstance()->getWinSize();
+    b2Vec2 currentVelocity = dynamicBody->GetLinearVelocity();
+    b2Vec2 impulse(0.0f,0.0f);
+
+    //auto touchLocation = this->convertToNodeSpace(location);
+    b2Vec2 touchLocation(location.x, location.y);
+    b2Vec2 playerPos = dynamicBody->GetPosition();
+
+    if (location.x < (winSize.width * 0.5f))
+    {
+        impulse.x = -2.0f;
+        dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
+    }
+    else if  (location.x > (winSize.width * 0.5f))
+    {
+        impulse.x = 2.0f;
+        dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
+
+    }
+
+/*
+    uint diffX = location.x - playerPos.x;
+    if (diffX < 0) // touch towards left of sprite, so move left
+    {
+        impulse.x = -1.0f;
+        dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
+        CCLOG("**************** diffX less than 0 = %u***********************", diffX);
+    }
+    else if (diffX > 0)
+    {
+        impulse.x = 1.0f;
+        dynamicBody->ApplyLinearImpulse(impulse, dynamicBody->GetWorldCenter(), true);
+        CCLOG("**************** diffX GREATER than 0 = %u ***********************", diffX);
+        CCLOG("Player position = %u, touch location = %u",playerPos.x, touchLocation.x);
+    }
+*/
 }
 
 void HelloWorld::tick(float dt)

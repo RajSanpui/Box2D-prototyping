@@ -6,7 +6,7 @@
 #define PROJ_ANDROID_DEBUGLAYER_H
 
 #include "GLES-Render.h"
-
+#include "Box2D/Box2D.h"
 class DebugLayer : public cocos2d::Layer
 {
 private:
