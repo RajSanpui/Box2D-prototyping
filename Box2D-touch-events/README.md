@@ -7,7 +7,8 @@ Declaration is same -
     {
       CCLOG("************** Touch event called ***************");
       auto currPosition = touch->getLocation();
-      if(ball1->getBoundingBox().containsPoint(currPosition)){
+      //if(ball1->getBoundingBox().containsPoint(currPosition)) This line should be commented if you wish to tap outside sprite to move
+      {
           CCLOG("************** Grounding event called ***************");
           b2Vec2 vel(currPosition.x, currPosition.y);
           dynamicBody2->SetLinearVelocity( vel );
