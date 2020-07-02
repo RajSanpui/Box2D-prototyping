@@ -14,6 +14,12 @@ Declaration is same -
       }
     }
     
+    // To stop Sprite movement
+    void HelloWorld::onTouchesEnded(Touch* touch, Event* evento)
+    {
+      dynamicBody->SetLinearVelocity(b2Vec2(0,0));
+    }
+    
     void HelloWorld::initTouch()
     {   
      auto listener = EventListenerTouchOneByOne::create();
